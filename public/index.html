@@ -463,6 +463,7 @@ let audioCtx = null;
 let ambientOn = false;
 let ambientNodes = [];
 let themeAudio = null;
+const API_BASE = "https://zikr-3p23.onrender.com";
 
 const AMBIENT_KEY = "zikr_ambient_on";
 
@@ -470,8 +471,8 @@ const AMBIENT_KEY = "zikr_ambient_on";
 //  REALTIME
 // ══════════════════════════════════════════
 function connectWs() {
-  const proto = location.protocol === "https:" ? "wss" : "ws";
-  ws = new WebSocket(proto + "://" + location.host);
+  const wsUrl = API_BASE.replace(/^http/, "ws");
+  ws = new WebSocket(wsUrl);
   ws.addEventListener("message", (evt) => {
     try {
       const msg = JSON.parse(evt.data);
@@ -500,7 +501,7 @@ function mergeState(payload) {
 
 async function fetchState() {
   try {
-    const res = await fetch("/api/state");
+    const res = await fetch(API_BASE + "/api/state");
     const data = await res.json();
     mergeState(data);
   } catch (e) {}
@@ -538,7 +539,7 @@ async function adminSave() {
     alert("Please fill all fields");
     return;
   }
-  await fetch("/api/admin/session", {
+  await fetch(API_BASE + "/api/admin/session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ zikrName: name, target, ytLink: yt, pin })
@@ -550,7 +551,7 @@ async function adminSave() {
 
 async function resetSession() {
   if (!confirm("Reset session? All counts will be cleared.")) return;
-  await fetch("/api/admin/reset", { method: "POST" });
+  await fetch(API_BASE + "/api/admin/reset", { method: "POST" });
   await fetchState();
   refreshAdminDash();
 }
@@ -587,7 +588,7 @@ function refreshAdminDash() {
 
 async function removeUser(nick) {
   if (!confirm("Remove " + nick + "?")) return;
-  await fetch("/api/admin/remove", {
+  await fetch(API_BASE + "/api/admin/remove", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ nick })
@@ -609,7 +610,7 @@ async function participantLogin() {
     return;
   }
   try {
-    const res = await fetch("/api/participant/login", {
+    const res = await fetch(API_BASE + "/api/participant/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nick, pin })
@@ -659,7 +660,7 @@ async function addCount(n) {
   const nick = state.currentUser;
   if (!nick) return;
   playTapTone(n);
-  await fetch("/api/participant/add", {
+  await fetch(API_BASE + "/api/participant/add", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ nick, delta: n })
@@ -670,7 +671,7 @@ async function addCount(n) {
 async function undoLast() {
   const nick = state.currentUser;
   if (!nick) return;
-  const res = await fetch("/api/participant/undo", {
+  const res = await fetch(API_BASE + "/api/participant/undo", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ nick })
