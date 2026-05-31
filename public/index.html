@@ -143,6 +143,8 @@ label{display:block;font-size:0.85rem;color:var(--gold);margin-bottom:0.4rem;let
 <div class="arabesque-b"></div>
 <div class="pattern-bg"></div>
 
+<audio id="theme-audio" src="assets/ambient.mp3" loop preload="none"></audio>
+
 <canvas id="star-canvas" class="fx-layer" aria-hidden="true"></canvas>
 <div class="fx-layer light-beams" aria-hidden="true">
   <div class="orb" style="top:10%;left:12%"></div>
@@ -460,6 +462,7 @@ let ws;
 let audioCtx = null;
 let ambientOn = false;
 let ambientNodes = [];
+let themeAudio = null;
 
 const AMBIENT_KEY = "zikr_ambient_on";
 
@@ -640,6 +643,7 @@ function loadParticipantView() {
   document.getElementById("part-zikr-display").textContent = state.session.zikrName || "Zikr";
   updateYtIframe();
   updatePartStats();
+  if (ambientOn) playThemeAudio();
 }
 
 function updateYtIframe() {
@@ -757,6 +761,21 @@ function setAmbientButton(on) {
   btn.classList.toggle("on", on);
 }
 
+async function playThemeAudio() {
+  if (!themeAudio) return;
+  try {
+    await themeAudio.play();
+  } catch (e) {
+    flashMsg("Tap any button to start audio");
+  }
+}
+
+function stopThemeAudio() {
+  if (!themeAudio) return;
+  themeAudio.pause();
+  themeAudio.currentTime = 0;
+}
+
 function ensureAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -764,62 +783,11 @@ function ensureAudio() {
 }
 
 function startAmbient() {
-  ensureAudio();
-  const base = audioCtx.currentTime;
-  const osc1 = audioCtx.createOscillator();
-  const osc2 = audioCtx.createOscillator();
-  const osc3 = audioCtx.createOscillator();
-  const osc4 = audioCtx.createOscillator();
-  const masterGain = audioCtx.createGain();
-  const filter = audioCtx.createBiquadFilter();
-  const lfo = audioCtx.createOscillator();
-  const lfoGain = audioCtx.createGain();
-
-  osc1.type = "sine";
-  osc2.type = "triangle";
-  osc3.type = "sine";
-  osc4.type = "sine";
-  osc1.frequency.value = 55;
-  osc2.frequency.value = 110;
-  osc3.frequency.value = 264;
-  osc4.frequency.value = 528;
-  osc2.detune.value = 3;
-  osc3.detune.value = -4;
-
-  filter.type = "lowpass";
-  filter.frequency.value = 900;
-  filter.Q.value = 0.8;
-
-  masterGain.gain.value = 0.14;
-  lfo.frequency.value = 0.06;
-  lfoGain.gain.value = 0.03;
-
-  lfo.connect(lfoGain);
-  lfoGain.connect(masterGain.gain);
-
-  osc1.connect(filter);
-  osc2.connect(filter);
-  osc3.connect(filter);
-  osc4.connect(filter);
-  filter.connect(masterGain);
-  masterGain.connect(audioCtx.destination);
-
-  osc1.start(base);
-  osc2.start(base);
-  osc3.start(base);
-  osc4.start(base);
-  lfo.start(base);
-
-  ambientNodes = [osc1, osc2, osc3, osc4, filter, masterGain, lfo, lfoGain];
+  playThemeAudio();
 }
 
 function stopAmbient() {
-  ambientNodes.forEach((node) => {
-    try {
-      if (node.stop) node.stop();
-    } catch (e) {}
-  });
-  ambientNodes = [];
+  stopThemeAudio();
 }
 
 function toggleAmbient() {
@@ -908,6 +876,7 @@ window.addEventListener("load", async () => {
   drawStars();
   connectWs();
   await fetchState();
+  themeAudio = document.getElementById("theme-audio");
   const storedAmbient = localStorage.getItem(AMBIENT_KEY) === "1";
   ambientOn = storedAmbient;
   setAmbientButton(ambientOn);
