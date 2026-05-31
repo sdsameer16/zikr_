@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;600;700&family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#c9a84c;--gold-light:#e8c96d;--gold-dark:#9a7a2e;
+  --emerald:#0d5c3a;--emerald-light:#1a8a58;--emerald-deep:#072b1c;
+  --cream:#fdf6e3;--cream-dark:#f0e8cc;--ink:#1a0f00;
+  --ruby:#8b1a1a;--pearl:#f8f4ec;--orange:#ff9f5a;
+}
+body{font-family:'Amiri',serif;background:var(--emerald-deep);color:var(--cream);min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh;position:relative}
+.screen.active{display:flex;flex-direction:column}
+
+/* ── IMMERSIVE FX ── */
+.fx-layer{position:fixed;inset:0;pointer-events:none;z-index:1}
+.light-beams{position:fixed;inset:-10%;opacity:0.45;mix-blend-mode:screen}
+.light-beams::before,.light-beams::after{
+  content:"";position:absolute;inset:-30%;
+  background:conic-gradient(from 180deg at 50% 50%,rgba(255,210,120,0.12),rgba(255,210,120,0.0),rgba(255,210,120,0.2));
+  filter:blur(12px);
+  animation:beams 18s linear infinite;
+}
+.light-beams::after{animation-duration:26s;opacity:0.6}
+@keyframes beams{0%{transform:rotate(0deg) scale(1)}100%{transform:rotate(360deg) scale(1.05)}}
+.orb{position:absolute;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(35,200,120,0.3),rgba(35,200,120,0.0) 70%);filter:blur(4px);animation:float 22s ease-in-out infinite}
+.orb.o2{width:220px;height:220px;animation-duration:30s;opacity:0.5}
+.orb.o3{width:140px;height:140px;animation-duration:26s;opacity:0.6}
+@keyframes float{0%{transform:translate(-10%,10%)}50%{transform:translate(20%,-10%)}100%{transform:translate(-10%,10%)}}
+.border-beams{position:fixed;inset:0;pointer-events:none;z-index:3}
+.border-beams span{position:absolute;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0.8;filter:blur(2px)}
+.border-beams .top,.border-beams .bottom{left:0;right:0;height:3px;animation:borderPulse 6s ease-in-out infinite}
+.border-beams .top{top:0}
+.border-beams .bottom{bottom:0;animation-delay:2s}
+.border-beams .left,.border-beams .right{top:0;bottom:0;width:3px;background:linear-gradient(0deg,transparent,var(--gold),transparent);animation:borderPulse 6s ease-in-out infinite}
+.border-beams .left{left:0;animation-delay:1s}
+.border-beams .right{right:0;animation-delay:3s}
+@keyframes borderPulse{0%,100%{opacity:0.2}50%{opacity:0.9}}
+
+/* ── ISLAMIC PATTERNS ── */
+.pattern-bg{
+  position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.07;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='%23c9a84c' fill-rule='evenodd'%3E%3Cpolygon points='40,5 47,20 63,20 51,29 55,45 40,36 25,45 29,29 17,20 33,20'/%3E%3C/g%3E%3C/svg%3E");
+}
+.arabesque{position:fixed;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--emerald-deep),var(--gold),var(--emerald-deep),var(--gold),var(--emerald-deep));z-index:10}
+.arabesque-b{position:fixed;bottom:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--emerald-deep),var(--gold),var(--emerald-deep),var(--gold),var(--emerald-deep));z-index:10}
+
+/* ── HEADER ── */
+.site-header{text-align:center;padding:2.5rem 1rem 1.5rem;z-index:2;position:relative}
+.bismillah{font-family:'Amiri',serif;font-size:2rem;color:var(--gold);letter-spacing:2px;direction:rtl;margin-bottom:0.5rem;text-shadow:0 0 30px rgba(201,168,76,0.4)}
+.site-title{font-family:'Cinzel',serif;font-size:1.4rem;color:var(--cream);letter-spacing:4px;text-transform:uppercase;opacity:0.9}
+.gold-divider{width:200px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:1rem auto}
+
+/* ── CARDS ── */
+.card{background:rgba(13,92,58,0.5);border:1px solid rgba(201,168,76,0.3);border-radius:16px;padding:1.5rem;backdrop-filter:blur(8px)}
+.card-gold{background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.5)}
+
+/* ── BUTTONS ── */
+.btn{font-family:'Cinzel',serif;border:none;cursor:pointer;border-radius:10px;transition:all 0.2s;letter-spacing:1px}
+.btn-gold{background:linear-gradient(135deg,var(--gold-dark),var(--gold),var(--gold-light));color:var(--emerald-deep);font-weight:700;padding:0.8rem 2rem;font-size:0.9rem}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,168,76,0.4)}
+.btn-gold:active{transform:scale(0.97)}
+.btn-outline{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:0.6rem 1.2rem;font-size:0.8rem}
+.btn-outline:hover{background:rgba(201,168,76,0.1)}
+.btn-danger{background:rgba(139,26,26,0.6);border:1px solid var(--ruby);color:#ffaaaa;padding:0.5rem 1rem;font-size:0.8rem;border-radius:8px}
+.ambient-btn{position:absolute;right:12px;top:12px;background:rgba(0,0,0,0.25);border:1px solid rgba(201,168,76,0.5);color:var(--gold-light);padding:0.35rem 0.7rem;border-radius:999px;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:1px;z-index:3}
+.ambient-btn.on{background:rgba(201,168,76,0.15);color:var(--gold)}
+
+/* ── INPUTS ── */
+.inp{background:rgba(253,246,227,0.08);border:1px solid rgba(201,168,76,0.3);border-radius:10px;padding:0.75rem 1rem;color:var(--cream);font-family:'Amiri',serif;font-size:1rem;width:100%;outline:none;transition:border 0.2s}
+.inp:focus{border-color:var(--gold)}
+.inp::placeholder{color:rgba(253,246,227,0.4)}
+label{display:block;font-size:0.85rem;color:var(--gold);margin-bottom:0.4rem;letter-spacing:1px}
+
+/* ── KEYPAD ── */
+.keypad-btn{background:rgba(13,92,58,0.7);border:1px solid rgba(201,168,76,0.3);color:var(--cream);font-family:'Cinzel',serif;font-size:1.1rem;font-weight:600;border-radius:12px;padding:1rem;cursor:pointer;transition:all 0.15s;user-select:none}
+.keypad-btn:hover{background:rgba(201,168,76,0.15);border-color:var(--gold)}
+.keypad-btn:active{transform:scale(0.93);background:rgba(201,168,76,0.25)}
+.keypad-btn.special{background:rgba(201,168,76,0.12);border-color:rgba(201,168,76,0.5);color:var(--gold-light)}
+
+/* ── COUNTER DISPLAY ── */
+.counter-big{font-family:'Cinzel',serif;font-size:4rem;font-weight:700;color:var(--gold);text-align:center;text-shadow:0 0 40px rgba(201,168,76,0.5);line-height:1}
+.counter-remaining{font-family:'Cinzel',serif;font-size:4.4rem;font-weight:700;color:var(--orange);text-align:center;text-shadow:0 0 50px rgba(255,159,90,0.6);line-height:1}
+.counter-label{font-size:0.85rem;color:rgba(253,246,227,0.6);text-align:center;letter-spacing:2px;margin-top:0.3rem}
+.pool-count{font-family:'Cinzel',serif;font-size:2.5rem;color:var(--gold-light);text-align:center}
+
+/* ── PROGRESS BAR ── */
+.prog-wrap{background:rgba(255,255,255,0.1);border-radius:999px;height:10px;overflow:hidden;margin:0.5rem 0}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--emerald-light),var(--gold));border-radius:999px;transition:width 0.6s ease}
+
+/* ── TABLE ── */
+.dash-table{width:100%;border-collapse:collapse;font-size:0.9rem}
+.dash-table th{color:var(--gold);padding:0.6rem 0.8rem;border-bottom:1px solid rgba(201,168,76,0.3);text-align:left;font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:1px}
+.dash-table td{padding:0.6rem 0.8rem;border-bottom:1px solid rgba(255,255,255,0.06);color:var(--cream)}
+.dash-table tr:hover td{background:rgba(201,168,76,0.05)}
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:0.7rem;font-weight:700;font-family:'Cinzel',serif}
+.rank-1{background:var(--gold);color:var(--emerald-deep)}
+.rank-2{background:#c0c0c0;color:#1a1a1a}
+.rank-3{background:#cd7f32;color:#fff}
+.rank-n{background:rgba(255,255,255,0.1);color:var(--cream)}
+
+/* ── NAV ── */
+.bottom-nav{display:flex;border-top:1px solid rgba(201,168,76,0.2);z-index:5;position:relative}
+.nav-btn{flex:1;padding:1rem;background:transparent;border:none;color:rgba(253,246,227,0.5);cursor:pointer;font-size:0.7rem;letter-spacing:1px;font-family:'Cinzel',serif;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:4px}
+.nav-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5}
+.nav-btn.active,.nav-btn:hover{color:var(--gold);background:rgba(201,168,76,0.05)}
+
+/* ── YOUTUBE ── */
+.yt-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;border:1px solid rgba(201,168,76,0.3)}
+.yt-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:12px}
+
+/* ── MISC ── */
+.ayah{font-family:'Amiri',serif;font-size:1.3rem;direction:rtl;text-align:center;color:var(--gold-light);line-height:2;opacity:0.85}
+.ayah-trans{font-size:0.8rem;color:rgba(253,246,227,0.55);text-align:center;font-style:italic;margin-top:0.3rem}
+.tasbih-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem}
+.user-pill{background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:999px;padding:0.3rem 0.9rem;font-size:0.8rem;color:var(--gold-light);display:inline-block}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+.tag{font-size:0.7rem;background:rgba(201,168,76,0.15);color:var(--gold);padding:2px 8px;border-radius:999px;display:inline-block;margin:2px}
+.fade-in{animation:fadeIn 0.4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.scroll-area{overflow-y:auto;flex:1}
+.flex{display:flex}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}
+.mt-1{margin-top:0.5rem}.mt-2{margin-top:1rem}.mt-3{margin-top:1.5rem}
+.text-center{text-align:center}.fw-bold{font-weight:700}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem}
+.section-title{font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.75rem;opacity:0.8}
+.star-separator{text-align:center;color:var(--gold);font-size:0.8rem;opacity:0.5;margin:0.75rem 0;letter-spacing:4px}
+
+@media (max-width:420px){
+  .counter-remaining{font-size:3.4rem}
+  .counter-big{font-size:3.4rem}
+}
+</style>
+</head>
+<body>
+<div class="arabesque"></div>
+<div class="arabesque-b"></div>
+<div class="pattern-bg"></div>
+
+<canvas id="star-canvas" class="fx-layer" aria-hidden="true"></canvas>
+<div class="fx-layer light-beams" aria-hidden="true">
+  <div class="orb" style="top:10%;left:12%"></div>
+  <div class="orb o2" style="bottom:15%;right:8%"></div>
+  <div class="orb o3" style="top:45%;right:35%"></div>
+</div>
+<div class="border-beams" aria-hidden="true">
+  <span class="top"></span>
+  <span class="bottom"></span>
+  <span class="left"></span>
+  <span class="right"></span>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN 1 — LANDING / CHOOSE ROLE
+════════════════════════════════════════ -->
+<div class="screen active" id="screen-landing" style="justify-content:center;align-items:center;padding:2rem">
+  <div style="width:100%;max-width:420px;text-align:center;z-index:2">
+    <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+    <div class="gold-divider"></div>
+    <div class="site-title">Zikr Pool</div>
+    <div style="margin:0.5rem 0 2rem;font-size:0.85rem;color:rgba(253,246,227,0.5);letter-spacing:1px">Collective Remembrance Tracker</div>
+    <div class="ayah">وَاذْكُرُوا اللَّهَ كَثِيرًا</div>
+    <div class="ayah-trans">"And remember Allah much" — Quran 62:10</div>
+    <div class="star-separator">✦ ✦ ✦</div>
+    <div class="card mt-2" style="text-align:left">
+      <p class="section-title">Enter as</p>
+      <div class="flex gap-3 mt-1">
+        <button class="btn btn-gold" style="flex:1" onclick="showScreen('screen-participant-login')">
+          Participant
+        </button>
+        <button class="btn btn-outline" style="flex:1;font-family:'Cinzel',serif;font-size:0.8rem" onclick="showScreen('screen-admin-login')">
+          Admin
+        </button>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem;font-size:0.75rem;color:rgba(253,246,227,0.3)">
+      "Verily, in the remembrance of Allah do hearts find rest." — Quran 13:28
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN 2 — ADMIN LOGIN
+════════════════════════════════════════ -->
+<div class="screen" id="screen-admin-login" style="justify-content:center;align-items:center;padding:2rem">
+  <div style="width:100%;max-width:380px;z-index:2">
+    <div class="text-center mb" style="margin-bottom:1.5rem">
+      <div class="bismillah" style="font-size:1.5rem">Admin Panel</div>
+      <div class="gold-divider"></div>
+    </div>
+    <div class="card">
+      <div style="margin-bottom:1rem">
+        <label>Admin Password</label>
+        <input class="inp" type="password" id="admin-pass" placeholder="Enter admin password" />
+      </div>
+      <div id="admin-err" style="color:#ff8888;font-size:0.8rem;margin-bottom:0.75rem;display:none">Incorrect password</div>
+      <button class="btn btn-gold" style="width:100%" onclick="adminLogin()">Enter Admin Panel</button>
+      <button class="btn btn-outline mt-1" style="width:100%;margin-top:0.75rem" onclick="showScreen('screen-landing')">← Back</button>
+    </div>
+    <div class="text-center mt-2" style="font-size:0.75rem;color:rgba(253,246,227,0.3)">Default password: <span style="color:var(--gold)">786</span></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN 3 — ADMIN PANEL
+════════════════════════════════════════ -->
+<div class="screen" id="screen-admin" style="flex-direction:column">
+  <div class="site-header" style="padding:1.5rem 1rem 1rem">
+    <div class="bismillah" style="font-size:1.2rem">Admin Panel</div>
+    <div class="gold-divider"></div>
+  </div>
+  <div class="scroll-area" style="padding:0 1rem 1rem;z-index:2">
+    <div class="card card-gold" style="margin-bottom:1rem">
+      <p class="section-title">Set Zikr Target</p>
+      <div style="margin-bottom:0.75rem">
+        <label>Zikr Name / Phrase</label>
+        <input class="inp" id="admin-zikr-name" placeholder="e.g. SubhanAllah" />
+      </div>
+      <div style="margin-bottom:0.75rem">
+        <label>Total Target Count</label>
+        <input class="inp" type="number" id="admin-target" placeholder="e.g. 100000" min="1" />
+      </div>
+      <div style="margin-bottom:0.75rem">
+        <label>YouTube Link (Surah/Nasheed)</label>
+        <input class="inp" id="admin-yt" placeholder="https://youtu.be/..." value="https://youtu.be/6MnZRf3fu_M?si=RGUIbfMesaabC9iw" />
+      </div>
+      <div style="margin-bottom:1rem">
+        <label>Session PIN (4 digits for participants)</label>
+        <input class="inp" type="number" id="admin-pin" placeholder="e.g. 1234" max="9999" />
+      </div>
+      <button class="btn btn-gold" style="width:100%" onclick="adminSave()">✓ Activate Session</button>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <p class="section-title">Live Dashboard</p>
+      <div id="admin-dash-stats" class="grid-2" style="margin-bottom:1rem">
+        <div class="card" style="text-align:center;padding:1rem">
+          <div style="font-size:0.7rem;color:rgba(253,246,227,0.5);letter-spacing:1px;margin-bottom:0.3rem">TOTAL DONE</div>
+          <div class="pool-count" id="admin-total-done" style="font-size:1.8rem">0</div>
+        </div>
+        <div class="card" style="text-align:center;padding:1rem">
+          <div style="font-size:0.7rem;color:rgba(253,246,227,0.5);letter-spacing:1px;margin-bottom:0.3rem">REMAINING</div>
+          <div class="pool-count" id="admin-remaining" style="font-size:1.8rem;color:var(--orange)">0</div>
+        </div>
+      </div>
+      <div class="prog-wrap"><div class="prog-fill" id="admin-prog" style="width:0%"></div></div>
+      <div style="text-align:right;font-size:0.75rem;color:var(--gold);margin-top:0.3rem" id="admin-pct">0%</div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <p class="section-title">Participants</p>
+      <table class="dash-table" id="admin-user-table">
+        <thead><tr><th>#</th><th>Nickname</th><th>Count</th><th>%</th><th></th></tr></thead>
+        <tbody id="admin-user-tbody"><tr><td colspan="5" style="text-align:center;opacity:0.4;padding:1rem">No participants yet</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="flex gap-3" style="margin-bottom:4rem">
+      <button class="btn btn-danger" style="flex:1" onclick="resetSession()">Reset Session</button>
+      <button class="btn btn-outline" style="flex:1" onclick="showScreen('screen-landing')">← Logout</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN 4 — PARTICIPANT LOGIN
+════════════════════════════════════════ -->
+<div class="screen" id="screen-participant-login" style="justify-content:center;align-items:center;padding:2rem">
+  <div style="width:100%;max-width:380px;z-index:2">
+    <div class="text-center" style="margin-bottom:1.5rem">
+      <div class="bismillah" style="font-size:1.5rem">Join the Zikr Circle</div>
+      <div class="gold-divider"></div>
+      <div class="ayah" style="font-size:1rem">اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ</div>
+    </div>
+    <div class="card">
+      <div style="margin-bottom:1rem">
+        <label>Your Nickname</label>
+        <input class="inp" id="part-nick" placeholder="e.g. Brother Ali" maxlength="20" />
+      </div>
+      <div style="margin-bottom:1rem">
+        <label>Session PIN</label>
+        <input class="inp" type="number" id="part-pin" placeholder="4-digit PIN from admin" max="9999" />
+      </div>
+      <div id="part-err" style="color:#ff8888;font-size:0.8rem;margin-bottom:0.75rem;display:none">Invalid PIN or no active session</div>
+      <button class="btn btn-gold" style="width:100%" onclick="participantLogin()">Enter the Circle →</button>
+      <button class="btn btn-outline mt-1" style="width:100%;margin-top:0.75rem" onclick="showScreen('screen-landing')">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN 5 — PARTICIPANT ZIKR (3 tabs)
+════════════════════════════════════════ -->
+<div class="screen" id="screen-participant" style="flex-direction:column">
+  <button class="ambient-btn" id="ambient-toggle" onclick="toggleAmbient()">♪ Ambient: OFF</button>
+  <!-- Header -->
+  <div style="text-align:center;padding:1rem 1rem 0.5rem;z-index:2;position:relative">
+    <div class="bismillah" style="font-size:1.1rem" id="part-zikr-display">SubhanAllah</div>
+    <div class="gold-divider" style="margin:0.5rem auto"></div>
+    <div class="flex gap-2" style="justify-content:center;align-items:center">
+      <span class="user-pill" id="part-nick-display">Brother</span>
+      <span style="font-size:0.75rem;color:rgba(253,246,227,0.4)">·</span>
+      <span style="font-size:0.75rem;color:rgba(253,246,227,0.5)" id="part-header-count">0 counted</span>
+    </div>
+  </div>
+
+  <!-- Tab content -->
+  <div class="scroll-area" style="padding:0.75rem 1rem;z-index:2" id="part-tab-content">
+
+    <!-- TAB: ZIKR -->
+    <div id="tab-zikr" class="fade-in">
+      <!-- Big remaining -->
+      <div class="card" style="text-align:center;margin-bottom:1rem;padding:1.8rem 1rem">
+        <div class="counter-remaining" id="part-remaining-big">0</div>
+        <div class="counter-label">REMAINING</div>
+        <div style="margin-top:0.75rem">
+          <div class="prog-wrap" style="max-width:280px;margin:0 auto"><div class="prog-fill" id="part-prog" style="width:0%"></div></div>
+          <div style="font-size:0.75rem;color:var(--gold);margin-top:0.3rem">Pool: <span id="part-pool-pct">0%</span> complete</div>
+        </div>
+      </div>
+
+      <!-- My count + Pool total -->
+      <div class="grid-2" style="margin-bottom:1rem">
+        <div class="card card-gold" style="text-align:center;padding:0.9rem">
+          <div style="font-size:0.65rem;color:rgba(253,246,227,0.5);letter-spacing:1px">MY COUNT</div>
+          <div style="font-family:'Cinzel',serif;font-size:1.4rem;color:var(--gold)" id="my-count">0</div>
+        </div>
+        <div class="card card-gold" style="text-align:center;padding:0.9rem">
+          <div style="font-size:0.65rem;color:rgba(253,246,227,0.5);letter-spacing:1px">POOL TOTAL</div>
+          <div style="font-family:'Cinzel',serif;font-size:1.4rem;color:var(--gold-light)" id="part-pool-total">0</div>
+        </div>
+      </div>
+
+      <!-- Target bar -->
+      <div class="card" style="display:flex;justify-content:space-around;text-align:center;margin-bottom:1rem;padding:0.75rem">
+        <div>
+          <div style="font-size:0.65rem;color:rgba(253,246,227,0.5);letter-spacing:1px">TARGET</div>
+          <div style="font-family:'Cinzel',serif;font-size:1.1rem;color:var(--cream)" id="part-target-disp">100,000</div>
+        </div>
+        <div style="width:1px;background:rgba(201,168,76,0.2)"></div>
+        <div>
+          <div style="font-size:0.65rem;color:rgba(253,246,227,0.5);letter-spacing:1px">DONE</div>
+          <div style="font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold)" id="part-done-disp">0</div>
+        </div>
+      </div>
+
+      <!-- Keypad -->
+      <div class="card" style="margin-bottom:0.5rem">
+        <p class="section-title" style="margin-bottom:0.5rem">Add Count</p>
+        <div class="grid-3" style="margin-bottom:0.5rem">
+          <button class="keypad-btn" onclick="addCount(1)">1</button>
+          <button class="keypad-btn" onclick="addCount(2)">2</button>
+          <button class="keypad-btn" onclick="addCount(3)">3</button>
+          <button class="keypad-btn" onclick="addCount(4)">4</button>
+          <button class="keypad-btn" onclick="addCount(5)">5</button>
+          <button class="keypad-btn" onclick="addCount(6)">6</button>
+          <button class="keypad-btn" onclick="addCount(7)">7</button>
+          <button class="keypad-btn" onclick="addCount(8)">8</button>
+          <button class="keypad-btn" onclick="addCount(9)">9</button>
+        </div>
+        <div class="grid-2" style="margin-bottom:0.5rem">
+          <button class="keypad-btn special" onclick="addCount(100)">+100</button>
+          <button class="keypad-btn special" onclick="addCount(200)">+200</button>
+          <button class="keypad-btn special" onclick="addCount(500)">+500</button>
+          <button class="keypad-btn special" onclick="addCount(1000)">+1000</button>
+        </div>
+        <button class="btn btn-danger" style="width:100%;font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:1px" onclick="undoLast()">↩ Undo Last</button>
+      </div>
+
+      <!-- Flash message -->
+      <div id="add-flash" style="text-align:center;font-size:0.85rem;color:var(--gold-light);height:1.5rem;transition:opacity 0.5s;opacity:0"></div>
+
+      <div class="star-separator" style="margin-bottom:4rem">✦ ✦ ✦</div>
+    </div>
+
+    <!-- TAB: DASHBOARD -->
+    <div id="tab-dash" style="display:none" class="fade-in">
+      <div class="card card-gold" style="text-align:center;margin-bottom:1rem;padding:1.5rem 1rem">
+        <div style="font-size:0.7rem;color:rgba(253,246,227,0.5);letter-spacing:2px;margin-bottom:0.5rem">COLLECTIVE ZIKR</div>
+        <div class="pool-count" id="dash-pool-big">0</div>
+        <div style="font-size:0.75rem;color:rgba(253,246,227,0.5);margin-top:0.3rem">of <span id="dash-target-big">100,000</span> target</div>
+        <div class="prog-wrap" style="margin-top:0.75rem"><div class="prog-fill" id="dash-prog-fill" style="width:0%"></div></div>
+        <div style="font-size:0.75rem;color:var(--gold);margin-top:0.3rem" id="dash-pct-label">0% complete</div>
+      </div>
+      <div class="card" style="margin-bottom:4rem">
+        <p class="section-title">Participants Ranking</p>
+        <table class="dash-table">
+          <thead><tr><th>#</th><th>Name</th><th>Count</th><th>Share</th></tr></thead>
+          <tbody id="dash-tbody"><tr><td colspan="4" style="text-align:center;opacity:0.4;padding:1rem">No data yet</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: SURAH -->
+    <div id="tab-surah" style="display:none" class="fade-in">
+      <div class="card" style="margin-bottom:1rem">
+        <p class="section-title" style="margin-bottom:0.75rem">Now Playing</p>
+        <div class="yt-wrap" id="yt-container">
+          <iframe
+            id="yt-iframe"
+            src="https://www.youtube.com/embed/6MnZRf3fu_M?autoplay=0&rel=0&modestbranding=1"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </div>
+      <div class="card card-gold" style="margin-bottom:4rem">
+        <div class="ayah" style="font-size:1.5rem">وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا</div>
+        <div class="ayah-trans">"And whoever fears Allah — He will make for him a way out." — Quran 65:2</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-zikr" onclick="switchTab('zikr')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      Zikr
+    </button>
+    <button class="nav-btn" id="nav-dash" onclick="switchTab('dash')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-btn" id="nav-surah" onclick="switchTab('surah')">
+      <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Surah
+    </button>
+    <button class="nav-btn" onclick="participantLogout()">
+      <svg viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/></svg>
+      Exit
+    </button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let state = {
+  session: {
+    active: false,
+    zikrName: "SubhanAllah",
+    target: 100000,
+    ytLink: "https://youtu.be/6MnZRf3fu_M?si=RGUIbfMesaabC9iw",
+    pin: "786"
+  },
+  users: {},
+  currentUser: null,
+  adminPass: "786"
+};
+
+let ws;
+let audioCtx = null;
+let ambientOn = false;
+let ambientNodes = [];
+
+const AMBIENT_KEY = "zikr_ambient_on";
+
+// ══════════════════════════════════════════
+//  REALTIME
+// ══════════════════════════════════════════
+function connectWs() {
+  const proto = location.protocol === "https:" ? "wss" : "ws";
+  ws = new WebSocket(proto + "://" + location.host);
+  ws.addEventListener("message", (evt) => {
+    try {
+      const msg = JSON.parse(evt.data);
+      if (msg.type === "state") {
+        mergeState(msg.payload);
+      }
+    } catch (e) {}
+  });
+  ws.addEventListener("close", () => {
+    setTimeout(connectWs, 2000);
+  });
+}
+
+function mergeState(payload) {
+  const currentUser = state.currentUser;
+  state.session = payload.session || state.session;
+  state.users = payload.users || {};
+  state.currentUser = currentUser;
+  if (document.getElementById("screen-participant").classList.contains("active")) {
+    updatePartStats();
+  }
+  if (document.getElementById("screen-admin").classList.contains("active")) {
+    refreshAdminDash();
+  }
+}
+
+async function fetchState() {
+  try {
+    const res = await fetch("/api/state");
+    const data = await res.json();
+    mergeState(data);
+  } catch (e) {}
+}
+
+// ══════════════════════════════════════════
+//  SCREEN NAVIGATION
+// ══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if (id === "screen-admin") refreshAdminDash();
+}
+
+// ══════════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════════
+function adminLogin() {
+  const p = document.getElementById("admin-pass").value;
+  if (p === state.adminPass) {
+    document.getElementById("admin-err").style.display = "none";
+    showScreen("screen-admin");
+    refreshAdminDash();
+  } else {
+    document.getElementById("admin-err").style.display = "block";
+  }
+}
+
+async function adminSave() {
+  const name = document.getElementById("admin-zikr-name").value.trim();
+  const target = parseInt(document.getElementById("admin-target").value, 10);
+  const yt = document.getElementById("admin-yt").value.trim();
+  const pin = document.getElementById("admin-pin").value.trim();
+  if (!name || !target || !pin) {
+    alert("Please fill all fields");
+    return;
+  }
+  await fetch("/api/admin/session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ zikrName: name, target, ytLink: yt, pin })
+  });
+  await fetchState();
+  alert("Session activated! Participants can now join with PIN: " + pin);
+  refreshAdminDash();
+}
+
+async function resetSession() {
+  if (!confirm("Reset session? All counts will be cleared.")) return;
+  await fetch("/api/admin/reset", { method: "POST" });
+  await fetchState();
+  refreshAdminDash();
+}
+
+function refreshAdminDash() {
+  const total = getTotalCount();
+  const target = state.session.target || 100000;
+  const remaining = Math.max(0, target - total);
+  const pct = Math.min(100, Math.round((total / target) * 100));
+  document.getElementById("admin-total-done").textContent = total.toLocaleString();
+  document.getElementById("admin-remaining").textContent = remaining.toLocaleString();
+  document.getElementById("admin-prog").style.width = pct + "%";
+  document.getElementById("admin-pct").textContent = pct + "%";
+  const tbody = document.getElementById("admin-user-tbody");
+  const sorted = getSortedUsers();
+  if (sorted.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;opacity:0.4;padding:1rem">No participants yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = sorted
+    .map(([nick, data], i) => {
+      const share = total > 0 ? Math.round((data.count / total) * 100) : 0;
+      const rankClass = i === 0 ? "rank-1" : i === 1 ? "rank-2" : i === 2 ? "rank-3" : "rank-n";
+      return `<tr>
+      <td><span class="rank-badge ${rankClass}">${i + 1}</span></td>
+      <td>${nick}</td>
+      <td style="color:var(--gold-light);font-family:'Cinzel',serif">${data.count.toLocaleString()}</td>
+      <td>${share}%</td>
+      <td><button class="btn btn-danger" style="padding:2px 6px;font-size:0.7rem;border-radius:6px" onclick="removeUser('${nick}')">✕</button></td>
+    </tr>`;
+    })
+    .join("");
+}
+
+async function removeUser(nick) {
+  if (!confirm("Remove " + nick + "?")) return;
+  await fetch("/api/admin/remove", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nick })
+  });
+  await fetchState();
+  refreshAdminDash();
+}
+
+// ══════════════════════════════════════════
+//  PARTICIPANT
+// ══════════════════════════════════════════
+async function participantLogin() {
+  const nick = document.getElementById("part-nick").value.trim();
+  const pin = document.getElementById("part-pin").value.trim();
+  const err = document.getElementById("part-err");
+  if (!nick) {
+    err.textContent = "Please enter a nickname";
+    err.style.display = "block";
+    return;
+  }
+  try {
+    const res = await fetch("/api/participant/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nick, pin })
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      err.textContent = data.error || "Invalid PIN or no active session";
+      err.style.display = "block";
+      return;
+    }
+  } catch (e) {
+    err.textContent = "Unable to reach server";
+    err.style.display = "block";
+    return;
+  }
+  err.style.display = "none";
+  state.currentUser = nick;
+  loadParticipantView();
+  showScreen("screen-participant");
+  switchTab("zikr");
+}
+
+function participantLogout() {
+  state.currentUser = null;
+  showScreen("screen-landing");
+}
+
+function loadParticipantView() {
+  const nick = state.currentUser;
+  document.getElementById("part-nick-display").textContent = nick;
+  document.getElementById("part-zikr-display").textContent = state.session.zikrName || "Zikr";
+  updateYtIframe();
+  updatePartStats();
+}
+
+function updateYtIframe() {
+  const yt = state.session.ytLink || "https://youtu.be/6MnZRf3fu_M";
+  let vid = yt;
+  const m = yt.match(/(?:youtu\.be\/|v=|embed\/)([a-zA-Z0-9_-]{11})/);
+  if (m) vid = m[1];
+  else vid = "6MnZRf3fu_M";
+  document.getElementById("yt-iframe").src = "https://www.youtube.com/embed/" + vid + "?rel=0&modestbranding=1";
+}
+
+async function addCount(n) {
+  const nick = state.currentUser;
+  if (!nick) return;
+  playTapTone(n);
+  await fetch("/api/participant/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nick, delta: n })
+  });
+  flashMsg("+" + n + " — BarakAllahu Feek!");
+}
+
+async function undoLast() {
+  const nick = state.currentUser;
+  if (!nick) return;
+  const res = await fetch("/api/participant/undo", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nick })
+  });
+  const data = await res.json();
+  if (!data.undone) {
+    flashMsg("Nothing to undo");
+    return;
+  }
+  flashMsg("Undid " + data.undone);
+}
+
+function updatePartStats() {
+  const nick = state.currentUser;
+  if (!nick) return;
+  const myCount = state.users[nick]?.count || 0;
+  const total = getTotalCount();
+  const target = state.session.target || 100000;
+  const remaining = Math.max(0, target - total);
+  const pct = Math.min(100, Math.round((total / target) * 100));
+  document.getElementById("my-count").textContent = myCount.toLocaleString();
+  document.getElementById("part-header-count").textContent = myCount.toLocaleString() + " counted";
+  document.getElementById("part-remaining-big").textContent = remaining.toLocaleString();
+  document.getElementById("part-prog").style.width = pct + "%";
+  document.getElementById("part-pool-pct").textContent = pct + "%";
+  document.getElementById("part-pool-total").textContent = total.toLocaleString();
+  document.getElementById("part-target-disp").textContent = target.toLocaleString();
+  document.getElementById("part-done-disp").textContent = total.toLocaleString();
+  document.getElementById("dash-pool-big").textContent = total.toLocaleString();
+  document.getElementById("dash-target-big").textContent = target.toLocaleString();
+  document.getElementById("dash-prog-fill").style.width = pct + "%";
+  document.getElementById("dash-pct-label").textContent = pct + "% complete";
+  updateDashTable();
+}
+
+function updateDashTable() {
+  const total = getTotalCount();
+  const sorted = getSortedUsers();
+  const tbody = document.getElementById("dash-tbody");
+  if (sorted.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;opacity:0.4;padding:1rem">No data yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = sorted
+    .map(([nick, data], i) => {
+      const share = total > 0 ? Math.round((data.count / total) * 100) : 0;
+      const rankClass = i === 0 ? "rank-1" : i === 1 ? "rank-2" : i === 2 ? "rank-3" : "rank-n";
+      const isMe = nick === state.currentUser ? 'style="background:rgba(201,168,76,0.07)"' : "";
+      return `<tr ${isMe}>
+      <td><span class="rank-badge ${rankClass}">${i + 1}</span></td>
+      <td>${nick}${nick === state.currentUser ? " <span class=\"tag\">you</span>" : ""}</td>
+      <td style="color:var(--gold-light);font-family:'Cinzel',serif">${data.count.toLocaleString()}</td>
+      <td>${share}%</td>
+    </tr>`;
+    })
+    .join("");
+}
+
+function flashMsg(msg) {
+  const el = document.getElementById("add-flash");
+  el.textContent = msg;
+  el.style.opacity = "1";
+  setTimeout(() => {
+    el.style.opacity = "0";
+  }, 1800);
+}
+
+// ══════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════
+function switchTab(tab) {
+  ["zikr", "dash", "surah"].forEach((t) => {
+    document.getElementById("tab-" + t).style.display = t === tab ? "block" : "none";
+    const nb = document.getElementById("nav-" + t);
+    if (nb) {
+      nb.classList.toggle("active", t === tab);
+    }
+  });
+  if (tab === "dash") updatePartStats();
+}
+
+// ══════════════════════════════════════════
+//  AUDIO
+// ══════════════════════════════════════════
+function setAmbientButton(on) {
+  const btn = document.getElementById("ambient-toggle");
+  btn.textContent = on ? "♪ Ambient: ON" : "♪ Ambient: OFF";
+  btn.classList.toggle("on", on);
+}
+
+function ensureAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+function startAmbient() {
+  ensureAudio();
+  const base = audioCtx.currentTime;
+  const osc1 = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const osc3 = audioCtx.createOscillator();
+  const osc4 = audioCtx.createOscillator();
+  const masterGain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+  const lfo = audioCtx.createOscillator();
+  const lfoGain = audioCtx.createGain();
+
+  osc1.type = "sine";
+  osc2.type = "triangle";
+  osc3.type = "sine";
+  osc4.type = "sine";
+  osc1.frequency.value = 55;
+  osc2.frequency.value = 110;
+  osc3.frequency.value = 264;
+  osc4.frequency.value = 528;
+  osc2.detune.value = 3;
+  osc3.detune.value = -4;
+
+  filter.type = "lowpass";
+  filter.frequency.value = 900;
+  filter.Q.value = 0.8;
+
+  masterGain.gain.value = 0.14;
+  lfo.frequency.value = 0.06;
+  lfoGain.gain.value = 0.03;
+
+  lfo.connect(lfoGain);
+  lfoGain.connect(masterGain.gain);
+
+  osc1.connect(filter);
+  osc2.connect(filter);
+  osc3.connect(filter);
+  osc4.connect(filter);
+  filter.connect(masterGain);
+  masterGain.connect(audioCtx.destination);
+
+  osc1.start(base);
+  osc2.start(base);
+  osc3.start(base);
+  osc4.start(base);
+  lfo.start(base);
+
+  ambientNodes = [osc1, osc2, osc3, osc4, filter, masterGain, lfo, lfoGain];
+}
+
+function stopAmbient() {
+  ambientNodes.forEach((node) => {
+    try {
+      if (node.stop) node.stop();
+    } catch (e) {}
+  });
+  ambientNodes = [];
+}
+
+function toggleAmbient() {
+  ambientOn = !ambientOn;
+  localStorage.setItem(AMBIENT_KEY, ambientOn ? "1" : "0");
+  setAmbientButton(ambientOn);
+  if (ambientOn) {
+    startAmbient();
+  } else {
+    stopAmbient();
+  }
+}
+
+function playTapTone(n) {
+  if (!ambientOn) return;
+  ensureAudio();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const freq = Math.min(880, 200 + Math.log10(n + 1) * 360);
+  osc.type = "sine";
+  osc.frequency.value = freq;
+  gain.gain.value = 0.08;
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  const now = audioCtx.currentTime;
+  gain.gain.setValueAtTime(0.08, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+  osc.start(now);
+  osc.stop(now + 0.3);
+}
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function getTotalCount() {
+  return Object.values(state.users).reduce((a, u) => a + (u.count || 0), 0);
+}
+function getSortedUsers() {
+  return Object.entries(state.users).sort((a, b) => (b[1].count || 0) - (a[1].count || 0));
+}
+
+// ══════════════════════════════════════════
+//  STARS CANVAS
+// ══════════════════════════════════════════
+const starCanvas = document.getElementById("star-canvas");
+const starCtx = starCanvas.getContext("2d");
+const stars = [];
+
+function resizeStars() {
+  starCanvas.width = window.innerWidth;
+  starCanvas.height = window.innerHeight;
+}
+
+function initStars() {
+  stars.length = 0;
+  for (let i = 0; i < 120; i += 1) {
+    stars.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: Math.random() * 1.6 + 0.4,
+      t: Math.random() * Math.PI * 2,
+      s: Math.random() * 0.6 + 0.2
+    });
+  }
+}
+
+function drawStars() {
+  starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+  for (const st of stars) {
+    st.t += 0.02 * st.s;
+    const a = 0.25 + Math.abs(Math.sin(st.t)) * 0.6;
+    starCtx.beginPath();
+    starCtx.fillStyle = "rgba(232,201,109," + a.toFixed(2) + ")";
+    starCtx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+    starCtx.fill();
+  }
+  requestAnimationFrame(drawStars);
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+window.addEventListener("load", async () => {
+  resizeStars();
+  initStars();
+  drawStars();
+  connectWs();
+  await fetchState();
+  const storedAmbient = localStorage.getItem(AMBIENT_KEY) === "1";
+  ambientOn = storedAmbient;
+  setAmbientButton(ambientOn);
+  if (ambientOn) startAmbient();
+
+  if (state.session.active) {
+    document.getElementById("admin-zikr-name").value = state.session.zikrName || "";
+    document.getElementById("admin-target").value = state.session.target || "";
+    document.getElementById("admin-yt").value = state.session.ytLink || "";
+    document.getElementById("admin-pin").value = state.session.pin || "";
+  }
+});
+
+window.addEventListener("resize", () => {
+  resizeStars();
+  initStars();
+});
+
+setInterval(fetchState, 8000);
+</script>
+</body>
+</html>
